@@ -33,7 +33,7 @@
 // AND HEIGHT ARGUMENTS).
 
 // Uncomment to disable Adafruit splash logo
-//  #define SSD1306_NO_SPLASH
+#define SSD1306_NO_SPLASH
 
 #if defined(ARDUINO_STM32_FEATHER)
 typedef class HardwareSPI SPIClass;
@@ -78,6 +78,7 @@ typedef uint32_t PortMask;
 #define SSD1306_SETCONTRAST 0x81         ///< See datasheet
 #define SSD1306_CHARGEPUMP 0x8D          ///< See datasheet
 #define SSD1306_SEGREMAP 0xA0            ///< See datasheet
+#define SSD1306_SEGREMAPINV 0xA1         ///< Set segment re-map inverted 
 #define SSD1306_DISPLAYALLON_RESUME 0xA4 ///< See datasheet
 #define SSD1306_DISPLAYALLON 0xA5        ///< Not currently used
 #define SSD1306_NORMALDISPLAY 0xA6       ///< See datasheet

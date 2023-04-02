@@ -41,12 +41,11 @@
 #elif defined(ESP8266) || defined(ESP32) || defined(ARDUINO_ARCH_RP2040)
 #include <pgmspace.h>
 #else
-#define pgm_read_byte(addr)                                                    \
-  (*(const unsigned char *)(addr)) ///< PROGMEM workaround for non-AVR
+#define pgm_read_byte(addr) \
+  (*(const unsigned char *)(addr))  ///< PROGMEM workaround for non-AVR
 #endif
 
-#if !defined(__ARM_ARCH) && !defined(ENERGIA) && !defined(ESP8266) &&          \
-    !defined(ESP32) && !defined(__arc__)
+#if !defined(__ARM_ARCH) && !defined(ENERGIA) && !defined(ESP8266) && !defined(ESP32) && !defined(__arc__)
 #include <util/delay.h>
 #endif
 
@@ -57,51 +56,51 @@
 // SOME DEFINES AND STATIC VARIABLES USED INTERNALLY -----------------------
 
 #if defined(I2C_BUFFER_LENGTH)
-#define WIRE_MAX min(256, I2C_BUFFER_LENGTH) ///< Particle or similar Wire lib
+#define WIRE_MAX min(256, I2C_BUFFER_LENGTH)  ///< Particle or similar Wire lib
 #elif defined(BUFFER_LENGTH)
-#define WIRE_MAX min(256, BUFFER_LENGTH) ///< AVR or similar Wire lib
+#define WIRE_MAX min(256, BUFFER_LENGTH)  ///< AVR or similar Wire lib
 #elif defined(SERIAL_BUFFER_SIZE)
-#define WIRE_MAX                                                               \
-  min(255, SERIAL_BUFFER_SIZE - 1) ///< Newer Wire uses RingBuffer
+#define WIRE_MAX \
+  min(255, SERIAL_BUFFER_SIZE - 1)  ///< Newer Wire uses RingBuffer
 #else
-#define WIRE_MAX 32 ///< Use common Arduino core default
+#define WIRE_MAX 32  ///< Use common Arduino core default
 #endif
 
-#define ssd1306_swap(a, b)                                                     \
-  (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b))) ///< No-temp-var swap operation
+#define ssd1306_swap(a, b) \
+  (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))  ///< No-temp-var swap operation
 
 #if ARDUINO >= 100
-#define WIRE_WRITE wire->write ///< Wire write function in recent Arduino lib
+#define WIRE_WRITE wire->write  ///< Wire write function in recent Arduino lib
 #else
-#define WIRE_WRITE wire->send ///< Wire write function in older Arduino lib
+#define WIRE_WRITE wire->send  ///< Wire write function in older Arduino lib
 #endif
 
 #ifdef HAVE_PORTREG
-#define SSD1306_SELECT *csPort &= ~csPinMask;       ///< Device select
-#define SSD1306_DESELECT *csPort |= csPinMask;      ///< Device deselect
-#define SSD1306_MODE_COMMAND *dcPort &= ~dcPinMask; ///< Command mode
-#define SSD1306_MODE_DATA *dcPort |= dcPinMask;     ///< Data mode
+#define SSD1306_SELECT *csPort &= ~csPinMask;        ///< Device select
+#define SSD1306_DESELECT *csPort |= csPinMask;       ///< Device deselect
+#define SSD1306_MODE_COMMAND *dcPort &= ~dcPinMask;  ///< Command mode
+#define SSD1306_MODE_DATA *dcPort |= dcPinMask;      ///< Data mode
 #else
-#define SSD1306_SELECT digitalWrite(csPin, LOW);       ///< Device select
-#define SSD1306_DESELECT digitalWrite(csPin, HIGH);    ///< Device deselect
-#define SSD1306_MODE_COMMAND digitalWrite(dcPin, LOW); ///< Command mode
-#define SSD1306_MODE_DATA digitalWrite(dcPin, HIGH);   ///< Data mode
+#define SSD1306_SELECT digitalWrite(csPin, LOW);        ///< Device select
+#define SSD1306_DESELECT digitalWrite(csPin, HIGH);     ///< Device deselect
+#define SSD1306_MODE_COMMAND digitalWrite(dcPin, LOW);  ///< Command mode
+#define SSD1306_MODE_DATA digitalWrite(dcPin, HIGH);    ///< Data mode
 #endif
 
 #if (ARDUINO >= 157) && !defined(ARDUINO_STM32_FEATHER)
-#define SETWIRECLOCK wire->setClock(wireClk)    ///< Set before I2C transfer
-#define RESWIRECLOCK wire->setClock(restoreClk) ///< Restore after I2C xfer
-#else // setClock() is not present in older Arduino Wire lib (or WICED)
-#define SETWIRECLOCK ///< Dummy stand-in define
-#define RESWIRECLOCK ///< keeps compiler happy
+#define SETWIRECLOCK wire->setClock(wireClk)     ///< Set before I2C transfer
+#define RESWIRECLOCK wire->setClock(restoreClk)  ///< Restore after I2C xfer
+#else                                            // setClock() is not present in older Arduino Wire lib (or WICED)
+#define SETWIRECLOCK                             ///< Dummy stand-in define
+#define RESWIRECLOCK                             ///< keeps compiler happy
 #endif
 
 #if defined(SPI_HAS_TRANSACTION)
-#define SPI_TRANSACTION_START spi->beginTransaction(spiSettings) ///< Pre-SPI
-#define SPI_TRANSACTION_END spi->endTransaction()                ///< Post-SPI
-#else // SPI transactions likewise not present in older Arduino SPI lib
-#define SPI_TRANSACTION_START ///< Dummy stand-in define
-#define SPI_TRANSACTION_END   ///< keeps compiler happy
+#define SPI_TRANSACTION_START spi->beginTransaction(spiSettings)  ///< Pre-SPI
+#define SPI_TRANSACTION_END spi->endTransaction()                 ///< Post-SPI
+#else                                                             // SPI transactions likewise not present in older Arduino SPI lib
+#define SPI_TRANSACTION_START                                     ///< Dummy stand-in define
+#define SPI_TRANSACTION_END                                       ///< keeps compiler happy
 #endif
 
 // The definition of 'transaction' is broadened a bit in the context of
@@ -114,24 +113,24 @@
 // in the TRANSACTION_* macros.
 
 // Check first if Wire, then hardware SPI, then soft SPI:
-#define TRANSACTION_START                                                      \
-  if (wire) {                                                                  \
-    SETWIRECLOCK;                                                              \
-  } else {                                                                     \
-    if (spi) {                                                                 \
-      SPI_TRANSACTION_START;                                                   \
-    }                                                                          \
-    SSD1306_SELECT;                                                            \
-  } ///< Wire, SPI or bitbang transfer setup
-#define TRANSACTION_END                                                        \
-  if (wire) {                                                                  \
-    RESWIRECLOCK;                                                              \
-  } else {                                                                     \
-    SSD1306_DESELECT;                                                          \
-    if (spi) {                                                                 \
-      SPI_TRANSACTION_END;                                                     \
-    }                                                                          \
-  } ///< Wire, SPI or bitbang transfer end
+#define TRANSACTION_START \
+  if (wire) { \
+    SETWIRECLOCK; \
+  } else { \
+    if (spi) { \
+      SPI_TRANSACTION_START; \
+    } \
+    SSD1306_SELECT; \
+  }  ///< Wire, SPI or bitbang transfer setup
+#define TRANSACTION_END \
+  if (wire) { \
+    RESWIRECLOCK; \
+  } else { \
+    SSD1306_DESELECT; \
+    if (spi) { \
+      SPI_TRANSACTION_END; \
+    } \
+  }  ///< Wire, SPI or bitbang transfer end
 
 // CONSTRUCTORS, DESTRUCTOR ------------------------------------------------
 
@@ -415,21 +414,12 @@ void Adafruit_SSD1306::ssd1306_command1(uint8_t c) {
 */
 void Adafruit_SSD1306::ssd1306_commandList(const uint8_t *c, uint8_t n) {
   if (wire) { // I2C
-    wire->beginTransmission(i2caddr);
-    WIRE_WRITE((uint8_t)0x00); // Co = 0, D/C = 0
-    uint16_t bytesOut = 1;
     while (n--) {
-      if (bytesOut >= WIRE_MAX) {
-        wire->endTransmission();
-        wire->beginTransmission(i2caddr);
-        WIRE_WRITE((uint8_t)0x00); // Co = 0, D/C = 0
-        bytesOut = 1;
-      }
-      WIRE_WRITE(pgm_read_byte(c++));
-      bytesOut++;
+      // send one command at a time. some displays don't wotk with
+      // multiple commands in one transmission.
+      ssd1306_command1(*c++);
     }
-    wire->endTransmission();
-  } else { // SPI -- transaction started in calling function
+  } else {  // SPI -- transaction started in calling function
     SSD1306_MODE_COMMAND
     while (n--)
       SPIwrite(pgm_read_byte(c++));
@@ -559,30 +549,6 @@ bool Adafruit_SSD1306::begin(uint8_t vcs, uint8_t addr, bool reset,
     digitalWrite(rstPin, HIGH); // Bring out of reset
   }
 
-  TRANSACTION_START
-
-  // Init sequence
-  static const uint8_t PROGMEM init1[] = {SSD1306_DISPLAYOFF,         // 0xAE
-                                          SSD1306_SETDISPLAYCLOCKDIV, // 0xD5
-                                          0x80, // the suggested ratio 0x80
-                                          SSD1306_SETMULTIPLEX}; // 0xA8
-  ssd1306_commandList(init1, sizeof(init1));
-  ssd1306_command1(HEIGHT - 1);
-
-  static const uint8_t PROGMEM init2[] = {SSD1306_SETDISPLAYOFFSET, // 0xD3
-                                          0x0,                      // no offset
-                                          SSD1306_SETSTARTLINE | 0x0, // line #0
-                                          SSD1306_CHARGEPUMP};        // 0x8D
-  ssd1306_commandList(init2, sizeof(init2));
-
-  ssd1306_command1((vccstate == SSD1306_EXTERNALVCC) ? 0x10 : 0x14);
-
-  static const uint8_t PROGMEM init3[] = {
-      SSD1306_MEMORYMODE, // 0x20
-      0x00,               // 0x0 act like ks0108, Horizontal addressing mode
-      SSD1306_SEGREMAP | 0x1, SSD1306_COMSCANDEC};
-  ssd1306_commandList(init3, sizeof(init3));
-
   // display parameter default values
   uint8_t comPins = 0x02;
   contrast = 0x8F;
@@ -600,27 +566,36 @@ bool Adafruit_SSD1306::begin(uint8_t vcs, uint8_t addr, bool reset,
     page_start = 28;
     page_end = 28 + WIDTH - 1;
   } else if ((WIDTH == 96) && (HEIGHT == 16)) {
-    comPins = 0x2; // ada x12
+    comPins = 0x2;  // ada x12
     contrast = (vccstate == SSD1306_EXTERNALVCC) ? 0x10 : 0xAF;
   } else {
     // Other screen varieties -- TBD
   }
 
-  ssd1306_command1(SSD1306_SETCOMPINS);
-  ssd1306_command1(comPins);
-  ssd1306_command1(SSD1306_SETCONTRAST);
-  ssd1306_command1(contrast);
+  TRANSACTION_START
 
-  ssd1306_command1(SSD1306_SETPRECHARGE); // 0xd9
-  ssd1306_command1((vccstate == SSD1306_EXTERNALVCC) ? 0x22 : 0xF1);
-  static const uint8_t PROGMEM init5[] = {
-      SSD1306_SETVCOMDETECT, // 0xDB
-      0x40,
-      SSD1306_DISPLAYALLON_RESUME, // 0xA4
-      SSD1306_NORMALDISPLAY,       // 0xA6
-      SSD1306_DEACTIVATE_SCROLL,
-      SSD1306_DISPLAYON}; // Main screen turn on
-  ssd1306_commandList(init5, sizeof(init5));
+  // Init sequence
+  uint8_t init1[] = {
+    SSD1306_DISPLAYOFF,                  // 0xAE
+    SSD1306_SETCONTRAST, contrast,       // 0x81
+    SSD1306_NORMALDISPLAY,               // 0xA6
+    SSD1306_DEACTIVATE_SCROLL,           // 0x2E
+    SSD1306_MEMORYMODE, 0x00,            // 0x20 Horizontal addressing mode
+    SSD1306_SEGREMAPINV,                 // 0xA1
+    SSD1306_SETMULTIPLEX, (HEIGHT - 1),  // 0xA8
+    SSD1306_COMSCANDEC,                  // 0xC8
+    SSD1306_SETDISPLAYOFFSET, 0x00,      // 0xD3, no offset
+    SSD1306_SETCOMPINS, comPins,         // 0xDA
+    SSD1306_SETDISPLAYCLOCKDIV, 0x80,    // 0xD5
+    SSD1306_SETPRECHARGE, 0x22,          // 0xd9
+    SSD1306_SETVCOMDETECT, 0x40,         // 0xDB
+    SSD1306_CHARGEPUMP, 0x14,            // 0x8D
+    SSD1306_SETSTARTLINE | 0x0,          // 0x40 line #0
+    SSD1306_DISPLAYALLON_RESUME,         // 0xA4
+    SSD1306_DISPLAYON                    // 0xAF
+  };
+
+  ssd1306_commandList(init1, sizeof(init1));
 
   TRANSACTION_END
 
@@ -998,14 +973,17 @@ uint8_t *Adafruit_SSD1306::getBuffer(void) { return buffer; }
 */
 void Adafruit_SSD1306::display(void) {
   TRANSACTION_START
-  static const uint8_t PROGMEM dlist1[] = {
-      SSD1306_PAGEADDR,
-      0,    // Page start address
-      0xFF, // Page end (not really, but works here)
-      SSD1306_COLUMNADDR};
+  uint8_t dlist1[] = {
+    SSD1306_PAGEADDR,
+    0,    // Page start address
+    0x7,  // Page end (not really, but works here)
+
+    SSD1306_COLUMNADDR,
+    page_start,  // Column start address
+    page_end     // Column end address
+
+  };
   ssd1306_commandList(dlist1, sizeof(dlist1));
-  ssd1306_command1(page_start); // Column start address
-  ssd1306_command1(page_end);   // Column end address
 
 #if defined(ESP8266)
   // ESP8266 needs a periodic yield() call to avoid watchdog reset.
